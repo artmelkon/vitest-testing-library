@@ -1,0 +1,60 @@
+import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import SummaryForm from "./SummaryForm";
+
+describe("SumaryForm", () => {
+  test("confirm order initial state", () => {
+    render(<SummaryForm />);
+
+    const buttonElm = screen.getByRole("button", { name: /confirm order/i });
+    const checkboxElm = screen.getByRole("checkbox", {
+      name: /terms and conditions/i,
+    });
+
+    // initial state: button enabled, checkbox unchecked
+    expect(buttonElm).toBeDisabled();
+    expect(checkboxElm).not.toBeChecked();
+  });
+
+  test("checkbox enables button on first click and disables on second click", () => {
+    render(<SummaryForm />);
+    const buttonElm = screen.getByRole("button", { name: /confirm order/i });
+    const checkboxElm = screen.getByRole("checkbox", {
+      name: /terms and conditions/i,
+    });
+
+    // check the checkbox → button should be disabled
+    fireEvent.click(checkboxElm);
+    expect(buttonElm).toBeEnabled();
+
+    // uncheck the checkbox → button should be enabled again
+    fireEvent.click(checkboxElm);
+    expect(buttonElm).toBeDisabled();
+  });
+  test("popover initialy absent andresponds on hover", async () => {
+    const user = userEvent.setup();
+    render(<SummaryForm />);
+    const nullPopover = screen.queryByText(
+      /no ice cream will actually be delivered/i,
+    );
+
+    //  1. queryBy -> null because popover not in DOM yet
+    expect(nullPopover).not.toBeInTheDocument();
+
+    // 2. Hover mouse ovefr the trigger span
+    const termsSpan = screen.getByText(/terms and conditions/i);
+    await user.hover(termsSpan);
+
+    // 3. Popover now in the DOM -> use getBy (throw if missing = clear failure message)
+    const popover = screen.getByText(
+      /no ice cream will actually be delivered/i,
+    );
+    expect(popover).toBeInTheDocument();
+
+    // 4. Move mouse away
+    await user.unhover(termsSpan);
+
+    // 5. Popover no longer in the DOM and the query is null
+    expect(nullPopover).not.toBeInTheDocument();
+  });
+});

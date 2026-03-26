@@ -1,14 +1,28 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "node:url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    }
+  },
   test: {
     // https://github.com/vitest-dev/vitest/blob/main/examples/react/vitest.config.ts
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/setupTests.js",
+    include: [
+      "tests/unit/**/*.test.{js,ts,jsx,tsx}",
+      "tests/integration/**/*.test.{js,ts,jsx,tsx}",
+    ],
     // you might want to disable the `css: true` line, since we don't have
     // tests that rely on CSS -- and parsing CSS is slow.
     // I'm leaving it in here becasue often people want to parse CSS in tests.
